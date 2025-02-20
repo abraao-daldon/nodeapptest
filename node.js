@@ -22,7 +22,10 @@ db.connect(err => {
     }
     console.log('Conectado ao banco de dados MySQL');
 });
-
+//RAIZ da URL.
+app.get('/', (req, res) => {
+    res.send('Servidor rodando! Use /usuarios para ver os dados.');
+});
 // Rota para buscar usuários
 app.get('/usuarios', (req, res) => {
     db.query('SELECT * FROM usuarios', (err, results) => {
