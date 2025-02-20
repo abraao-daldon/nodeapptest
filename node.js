@@ -2,6 +2,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 const app = express();
@@ -22,10 +23,15 @@ db.connect(err => {
     }
     console.log('Conectado ao banco de dados MySQL');
 });
-//RAIZ da URL.
+
+// Middleware para parse de JSON
+app.use(express.json());  // Atualizado para express.json()
+
+// Raiz.
 app.get('/', (req, res) => {
     res.send('Servidor rodando! Use /usuarios para ver os dados.');
 });
+
 // Rota para buscar usuários
 app.get('/usuarios', (req, res) => {
     db.query('SELECT * FROM usuarios', (err, results) => {
@@ -34,6 +40,29 @@ app.get('/usuarios', (req, res) => {
             return;
         }
         res.json(results);
+    });
+});
+
+app.get('/formulario', (req, res) => {
+  	res.sendFile(path.join( '/home/jelastic/ROOT/', 'formulario.html'));
+});
+                      
+                           
+                         
+
+// Nova rota para exibir e inserir dados
+app.post('/novo-usuario', (req, res) => {
+    const { nome, sobrenome, email } = req.body;
+    if (!nome || !sobrenome || !email) {
+        return res.status(400).json({ error: 'Nome Sobrenome e email são obrigatórios!' });
+    }
+
+    const sql = 'INSERT INTO usuarios (nome, sobrenome, email) VALUES (?, ?, ?)';
+    db.query(sql, [nome, sobrenome, email], (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: 'Erro ao inserir usuário' });
+        }
+        res.status(201).json({ message: 'Usuário inserido com sucesso!', id: result.insertId });
     });
 });
 
